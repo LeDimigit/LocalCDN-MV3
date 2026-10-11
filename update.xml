@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<gupdate xmlns='http://www.google.com/update2/response' protocol='2.0'>
+  <app appid='REMPLACE_PAR_LID_DE_TON_EXTENSION'>
+    <updatecheck codebase='https://github.com/LeDimigit/LocalCDN-MV3/releases/latest/download/LocalCDN-MV3.crx' version='2.6.86' />
+  </app>
+</gupdate>
