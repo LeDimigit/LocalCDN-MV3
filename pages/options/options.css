@@ -406,7 +406,7 @@ body[dir="rtl"] .input-text {
     width: 10px;
 }
 
-.chromium-banner {
+.managed-banner {
     background-color: #ffcccc;
     border: 1px solid red;
     border-radius: 3px;
@@ -464,7 +464,7 @@ body[dir="rtl"] .input-text {
         background-image: url("../../icons/help-light.svg");
     }
 
-    .chromium-banner {
+    .managed-banner {
         background-color: #A20B0B;
         color: white;
     }

@@ -56,13 +56,17 @@ stats.setStats = function (injection) {
         data[today] = newEntry;
     }
 
-    chrome.storage.local.set({
-        [Setting.INTERNAL_STATISTICS_DATA]: data,
-    });
+    stats._save();
 };
 
+stats._save = helpers.throttle(function () {
+    browser.storage.local.set({
+        [Setting.INTERNAL_STATISTICS_DATA]: storageManager.statistics,
+    });
+}, StorageWriteInterval);
+
 stats.getStats = function () {
-    chrome.storage.local.get([Setting.INTERNAL_STATISTICS_DATA], function (items) {
+    browser.storage.local.get([Setting.INTERNAL_STATISTICS_DATA], function (items) {
         storageManager.statistics = items.internalStatisticsData || {};
     });
 };

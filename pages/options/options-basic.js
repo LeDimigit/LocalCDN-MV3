@@ -28,7 +28,7 @@ let optionsBasic = {};
 
 optionsBasic.init = function (opt) {
     let showIconBadge, updateNotification, disablePrefetch, stripMetadata, internalStatistics,
-        hideDonationButton, allowlistedDomains;
+        hideDonationButton, hideCounters, allowlistedDomains;
 
     showIconBadge = options.getOptionElement(Setting.SHOW_ICON_BADGE);
     showIconBadge.addEventListener('change', options.onOptionChanged);
@@ -53,6 +53,10 @@ optionsBasic.init = function (opt) {
     hideDonationButton = options.getOptionElement(Setting.HIDE_DONATION_BUTTON);
     hideDonationButton.addEventListener('change', options.onOptionChanged);
     hideDonationButton.checked = opt[Setting.HIDE_DONATION_BUTTON];
+
+    hideCounters = options.getOptionElement(Setting.HIDE_COUNTERS);
+    hideCounters.addEventListener('change', options.onOptionChanged);
+    hideCounters.checked = opt[Setting.HIDE_COUNTERS];
 
     allowlistedDomains = options.getOptionElement(Setting.ALLOWLISTED_DOMAINS);
     allowlistedDomains.addEventListener('keyup', options.onOptionChanged);

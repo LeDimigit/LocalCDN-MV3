@@ -124,6 +124,10 @@ messenger._dispatch = function (message, sender, sendResponse) {
             });
             return MessageResponse.ASYNCHRONOUS;
 
+        case 'statistic:get':
+            sendResponse({'value': storageManager.statistics});
+            return MessageResponse.SYNCHRONOUS;
+
         case 'statistic:delete':
             storageManager.statistics = {};
             break;
@@ -137,12 +141,17 @@ messenger._dispatch = function (message, sender, sendResponse) {
             log.persist();
             break;
 
+        case 'settings:get-managed':
+            main.settingsReady.then(() => sendResponse({'value': main.managedSettings}));
+            return MessageResponse.ASYNCHRONOUS;
+
         case 'popup:get-data':
             popup.amountInjected = storageManager.amountInjected;
             popup.internalStatistics = stateManager.internalStatistics;
             popup.negateHtmlFilterList = stateManager.getInvertOption;
             popup.loggingStatus = stateManager.logging;
             popup.hideDonationButton = stateManager.hideDonationButton;
+            popup.hideCounters = stateManager.hideCounters;
             popup.blockGoogleFonts = interceptor.blockGoogleFonts;
             sendResponse({'data': popup});
             return MessageResponse.ASYNCHRONOUS;
@@ -154,4 +163,4 @@ messenger._dispatch = function (message, sender, sendResponse) {
  * Event Handlers
  */
 
-chrome.runtime.onMessage.addListener(messenger._handleMessageReceived);
+browser.runtime.onMessage.addListener(messenger._handleMessageReceived);

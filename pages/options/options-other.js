@@ -47,7 +47,7 @@ optionsOther._renderIconSection = function (opt) {
     } else if (selectedIcon === 'Light') {
         document.getElementById('icon-light').checked = true;
     }
-    url = chrome.runtime.getURL(`icons/action/${selectedIcon.toLowerCase()}/icon38-default.png`);
+    url = browser.runtime.getURL(`icons/action/${selectedIcon.toLowerCase()}/icon38-default.png`);
     document.getElementById(BadgeSetting.HTML_ICON_BADGE_PREVIEW).src = url;
     document.getElementById(BadgeSettingHTMLFilter.HTML_ICON_BADGE_PREVIEW).src = url;
     document.getElementById(BadgeSettingMissingResource.HTML_ICON_BADGE_PREVIEW).src = url;
@@ -95,7 +95,7 @@ optionsOther._renderStorageSection = function (opt) {
 
 optionsOther._setIcon = function (optionValue) {
     wrappers.setIcon({'path': optionValue}, 'Enabled');
-    let url = chrome.runtime.getURL(`icons/action/${optionValue.toLowerCase()}/icon38-default.png`);
+    let url = browser.runtime.getURL(`icons/action/${optionValue.toLowerCase()}/icon38-default.png`);
     document.getElementById(BadgeSetting.HTML_ICON_BADGE_PREVIEW).src = url;
     document.getElementById(BadgeSettingHTMLFilter.HTML_ICON_BADGE_PREVIEW).src = url;
     document.getElementById(BadgeSettingMissingResource.HTML_ICON_BADGE_PREVIEW).src = url;
@@ -110,7 +110,9 @@ optionsOther._preSelectStorage = function (type) {
 };
 
 optionsOther._onStorageOptionChanged = function ({target}) {
-    chrome.storage.local.set({
+    // Further changes on this page are written to the selected storage
+    options._storageType = target.value;
+    browser.storage.local.set({
         [Setting.STORAGE_TYPE]: target.value,
     });
     if (target.value === 'local') {

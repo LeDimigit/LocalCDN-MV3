@@ -35,7 +35,7 @@
             <input type="button" id="btn-info-tab" class="option-buttons" data-option-tab="info-tab" data-i18n-content="btnInfo" value="Info">
         </div>
 
-        <div id="chromium-banner" class="chromium-banner">Non-Firefox browsers do not support all features of LocalCDN. <a class="no-icon" href="../help/help.html#browser-compatibility">Read more</a></div>
+        <div id="managed-banner" class="managed-banner" data-i18n-content="managedSettingsNotice">Some settings are managed by your administrator and can't be changed.</div>
 
         <div id="general-tab" class="tab-content">
             <div class="option-group">
@@ -96,6 +96,15 @@
                         <label class="b-contain">
                             <input data-option="hideDonationButton" type="checkbox">
                             <span data-i18n-content="hideDonationButton">Hide donation button</span>
+                            <span class="b-input"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="option">
+                    <div class="title-option">
+                        <label class="b-contain">
+                            <input data-option="hideCounters" type="checkbox">
+                            <span data-i18n-content="hideCounters">Hide counters in the popup</span>
                             <span class="b-input"></span>
                         </label>
                     </div>

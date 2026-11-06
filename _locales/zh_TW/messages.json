@@ -255,6 +255,10 @@
         "message": "隱藏捐款按鈕",
         "description": "Hide donation button"
     },
+    "hideCounters": {
+        "message": "",
+        "description": "Hide the counters of replaced, blocked and missing resources in the popup"
+    },
     "betaLabel": {
         "message": "測試",
         "description": "beta"
@@ -526,5 +530,13 @@
     "permissionMoreInfo": {
         "message": "更多資訊",
         "description": "More info"
+    },
+    "managedSettingsNotice": {
+        "message": "",
+        "description": "Notice if settings are set by an enterprise policy"
+    },
+    "managedSetting": {
+        "message": "",
+        "description": "Tooltip of a setting which is set by an enterprise policy"
     }
 }

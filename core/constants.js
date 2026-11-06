@@ -18,6 +18,11 @@
 
 'use strict';
 
+// Chromium (Manifest V3): the 'browser' namespace is an alias of 'chrome' (promise based)
+if (typeof browser === 'undefined') {
+    globalThis.browser = chrome;
+}
+
 /**
  * Constants
  */
@@ -26,13 +31,10 @@ const Address = {
     'ANY_PATH': '/*',
     'ANY_PROTOCOL': '*://',
     'CHROME': 'chrome:',
-    'CHROME_EXTENSION': 'chrome-extension:',
     'LOCALCDN': 'localcdn.org',
     'EXAMPLE': 'example.org',
     'HTTP': 'http:',
     'HTTPS': 'https:',
-    'RESOURCE_PATH': '/resources',
-    'ROOT_PATH': '/',
     'WWW_PREFIX': 'www.'
 };
 
@@ -131,8 +133,16 @@ const Setting = {
     'BADGE_MISSING_RESOURCE_BACKGROUND_COLOR': 'badgeMissingResourceBackgroundColor',
     'BADGE_MISSING_RESOURCE_TEXT_COLOR': 'badgeMissingResourceTextColor',
     'HIDE_DONATION_BUTTON': 'hideDonationButton',
+    'HIDE_COUNTERS': 'hideCounters',
     'CHANGE_BADGE_COLOR_MISSING_RESOURCES': 'changeBadgeColorMissingResources',
+    'HIDE_WELCOME_PAGE': 'hideWelcomePage',
 };
+
+// Minimum interval between frequent storage writes (counter, statistics) in milliseconds
+const StorageWriteInterval = 500;
+
+// Maximum number of log entries kept in memory, older entries are removed
+const LogMaxEntries = 1000;
 
 const SettingDefaults = {
     [Setting.ALLOWED_DOMAINS_GOOGLE_FONTS]: {},
@@ -162,6 +172,7 @@ const SettingDefaults = {
     [Setting.BADGE_MISSING_RESOURCE_BACKGROUND_COLOR]: BadgeSettingMissingResource.HEX_BACKGROUND_COLOR,
     [Setting.BADGE_MISSING_RESOURCE_TEXT_COLOR]: BadgeSettingMissingResource.HEX_TEXT_COLOR,
     [Setting.HIDE_DONATION_BUTTON]: false,
+    [Setting.HIDE_COUNTERS]: false,
     [Setting.CHANGE_BADGE_COLOR_MISSING_RESOURCES]: false,
 };
 
@@ -194,69 +205,69 @@ const Allowlist = {
 };
 
 const BrowserType = {
-    'CHROMIUM': chrome.runtime.getURL('/').startsWith('chrome-extension'),
-    'FIREFOX': chrome.runtime.getURL('/').startsWith('moz-extension')
+    'CHROMIUM': browser.runtime.getURL('/').startsWith('chrome-extension'),
+    'FIREFOX': browser.runtime.getURL('/').startsWith('moz-extension')
 };
 
 const IconType = {
     'Default': {
         'Enabled': {
-            '16': chrome.runtime.getURL('icons/action/default/icon16-default.png'),
-            '18': chrome.runtime.getURL('icons/action/default/icon18-default.png'),
-            '19': chrome.runtime.getURL('icons/action/default/icon19-default.png'),
-            '32': chrome.runtime.getURL('icons/action/default/icon32-default.png'),
-            '36': chrome.runtime.getURL('icons/action/default/icon36-default.png'),
-            '38': chrome.runtime.getURL('icons/action/default/icon38-default.png'),
-            '64': chrome.runtime.getURL('icons/action/default/icon64-default.png')
+            '16': browser.runtime.getURL('icons/action/default/icon16-default.png'),
+            '18': browser.runtime.getURL('icons/action/default/icon18-default.png'),
+            '19': browser.runtime.getURL('icons/action/default/icon19-default.png'),
+            '32': browser.runtime.getURL('icons/action/default/icon32-default.png'),
+            '36': browser.runtime.getURL('icons/action/default/icon36-default.png'),
+            '38': browser.runtime.getURL('icons/action/default/icon38-default.png'),
+            '64': browser.runtime.getURL('icons/action/default/icon64-default.png')
         },
         'Disabled': {
-            '16': chrome.runtime.getURL('icons/action/default/icon16-disabled.png'),
-            '18': chrome.runtime.getURL('icons/action/default/icon18-disabled.png'),
-            '19': chrome.runtime.getURL('icons/action/default/icon19-disabled.png'),
-            '32': chrome.runtime.getURL('icons/action/default/icon32-disabled.png'),
-            '36': chrome.runtime.getURL('icons/action/default/icon36-disabled.png'),
-            '38': chrome.runtime.getURL('icons/action/default/icon38-disabled.png'),
-            '64': chrome.runtime.getURL('icons/action/default/icon64-disabled.png')
+            '16': browser.runtime.getURL('icons/action/default/icon16-disabled.png'),
+            '18': browser.runtime.getURL('icons/action/default/icon18-disabled.png'),
+            '19': browser.runtime.getURL('icons/action/default/icon19-disabled.png'),
+            '32': browser.runtime.getURL('icons/action/default/icon32-disabled.png'),
+            '36': browser.runtime.getURL('icons/action/default/icon36-disabled.png'),
+            '38': browser.runtime.getURL('icons/action/default/icon38-disabled.png'),
+            '64': browser.runtime.getURL('icons/action/default/icon64-disabled.png')
         }
     },
     'Light': {
         'Enabled': {
-            '16': chrome.runtime.getURL('icons/action/light/icon16-default.png'),
-            '18': chrome.runtime.getURL('icons/action/light/icon18-default.png'),
-            '19': chrome.runtime.getURL('icons/action/light/icon19-default.png'),
-            '32': chrome.runtime.getURL('icons/action/light/icon32-default.png'),
-            '36': chrome.runtime.getURL('icons/action/light/icon36-default.png'),
-            '38': chrome.runtime.getURL('icons/action/light/icon38-default.png'),
-            '64': chrome.runtime.getURL('icons/action/light/icon64-default.png')
+            '16': browser.runtime.getURL('icons/action/light/icon16-default.png'),
+            '18': browser.runtime.getURL('icons/action/light/icon18-default.png'),
+            '19': browser.runtime.getURL('icons/action/light/icon19-default.png'),
+            '32': browser.runtime.getURL('icons/action/light/icon32-default.png'),
+            '36': browser.runtime.getURL('icons/action/light/icon36-default.png'),
+            '38': browser.runtime.getURL('icons/action/light/icon38-default.png'),
+            '64': browser.runtime.getURL('icons/action/light/icon64-default.png')
         },
         'Disabled': {
-            '16': chrome.runtime.getURL('icons/action/light/icon16-disabled.png'),
-            '18': chrome.runtime.getURL('icons/action/light/icon18-disabled.png'),
-            '19': chrome.runtime.getURL('icons/action/light/icon19-disabled.png'),
-            '32': chrome.runtime.getURL('icons/action/light/icon32-disabled.png'),
-            '36': chrome.runtime.getURL('icons/action/light/icon36-disabled.png'),
-            '38': chrome.runtime.getURL('icons/action/light/icon38-disabled.png'),
-            '64': chrome.runtime.getURL('icons/action/light/icon64-disabled.png')
+            '16': browser.runtime.getURL('icons/action/light/icon16-disabled.png'),
+            '18': browser.runtime.getURL('icons/action/light/icon18-disabled.png'),
+            '19': browser.runtime.getURL('icons/action/light/icon19-disabled.png'),
+            '32': browser.runtime.getURL('icons/action/light/icon32-disabled.png'),
+            '36': browser.runtime.getURL('icons/action/light/icon36-disabled.png'),
+            '38': browser.runtime.getURL('icons/action/light/icon38-disabled.png'),
+            '64': browser.runtime.getURL('icons/action/light/icon64-disabled.png')
         }
     },
     'Grey': {
         'Enabled': {
-            '16': chrome.runtime.getURL('icons/action/grey/icon16-default.png'),
-            '18': chrome.runtime.getURL('icons/action/grey/icon18-default.png'),
-            '19': chrome.runtime.getURL('icons/action/grey/icon19-default.png'),
-            '32': chrome.runtime.getURL('icons/action/grey/icon32-default.png'),
-            '36': chrome.runtime.getURL('icons/action/grey/icon36-default.png'),
-            '38': chrome.runtime.getURL('icons/action/grey/icon38-default.png'),
-            '64': chrome.runtime.getURL('icons/action/grey/icon64-default.png')
+            '16': browser.runtime.getURL('icons/action/grey/icon16-default.png'),
+            '18': browser.runtime.getURL('icons/action/grey/icon18-default.png'),
+            '19': browser.runtime.getURL('icons/action/grey/icon19-default.png'),
+            '32': browser.runtime.getURL('icons/action/grey/icon32-default.png'),
+            '36': browser.runtime.getURL('icons/action/grey/icon36-default.png'),
+            '38': browser.runtime.getURL('icons/action/grey/icon38-default.png'),
+            '64': browser.runtime.getURL('icons/action/grey/icon64-default.png')
         },
         'Disabled': {
-            '16': chrome.runtime.getURL('icons/action/grey/icon16-disabled.png'),
-            '18': chrome.runtime.getURL('icons/action/grey/icon18-disabled.png'),
-            '19': chrome.runtime.getURL('icons/action/grey/icon19-disabled.png'),
-            '32': chrome.runtime.getURL('icons/action/grey/icon32-disabled.png'),
-            '36': chrome.runtime.getURL('icons/action/grey/icon36-disabled.png'),
-            '38': chrome.runtime.getURL('icons/action/grey/icon38-disabled.png'),
-            '64': chrome.runtime.getURL('icons/action/grey/icon64-disabled.png')
+            '16': browser.runtime.getURL('icons/action/grey/icon16-disabled.png'),
+            '18': browser.runtime.getURL('icons/action/grey/icon18-disabled.png'),
+            '19': browser.runtime.getURL('icons/action/grey/icon19-disabled.png'),
+            '32': browser.runtime.getURL('icons/action/grey/icon32-disabled.png'),
+            '36': browser.runtime.getURL('icons/action/grey/icon36-disabled.png'),
+            '38': browser.runtime.getURL('icons/action/grey/icon38-disabled.png'),
+            '64': browser.runtime.getURL('icons/action/grey/icon64-disabled.png')
         }
     }
 };
@@ -275,7 +286,9 @@ const Regex = {
     'TWITTER_BOOTSTRAP_ALPHA_BETA': /-(alpha|beta).?\d?/,
     'INTERNAL_STATISTICS_DATA': /((2\d)\d{2})-(0[1-9]|1[012])-(0[1-9]|[12]\d|3[01])/,
     'DOMAIN': /[a-z0-9]+([-.]{1}[a-z0-9]+)*\.[a-z]{2,24}/,
-    'INTERNAL_RESOURCES': /resources\/[0-9a-z.-]+\/((?:\d{1,2}\.){1,3}\d{1,2})?.*\.(css|jsm)/,
+    // Host as stored in domain lists: optional wildcard, hostname, IPv4 or IPv6 and optional port
+    'LISTED_HOST': /^(\*\.)?([\p{L}\p{N}_-]+(\.[\p{L}\p{N}_-]+)*\.?|\[[0-9a-f:.]+\])(:\d{1,5})?$/iu,
+    'INTERNAL_RESOURCES': /^resources\/[\w.@+~-]+(\/[\w.@+~-]+)*\/?$/,
     'ISO_DATE': /((2\d)\d{2})-(0[1-9]|1[012])-(0[1-9]|[12]\d|3[01])/,
     'HEX_COLOR': /#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/,
     'DOCSIFY': /docsify@(?:\d{1,2}\.){0,3}\d{1,2}(?:-\d)?$/,
@@ -288,16 +301,16 @@ const MaterialIcons = {
 const Links = {
     'CODEBERG_HTML_FILTER': 'https://codeberg.org/nobody/LocalCDN/wiki/Home#user-content-7-a-website-looks-weird-or-cannot-be-used-if-i-deactivate-localcdn-everything-works-what-is-the-problem',
     'CODEBERG_RULESET': 'https://codeberg.org/nobody/LocalCDN/wiki/Home#user-content-6-why-do-i-need-this-rule-generator-i-use-an-adblocker-and-want-to-import-these-rules-how-does-it-work',
-    'WELCOME': chrome.runtime.getURL('pages/welcome/welcome.html'),
-    'DONATE': chrome.runtime.getURL('pages/donate/donate.html'),
-    'CHANGELOG': chrome.runtime.getURL('pages/updates/updates.html'),
-    'FAQ': chrome.runtime.getURL('pages/help/help.html'),
-    'FAQ_HTML_FILTER': chrome.runtime.getURL('pages/help/help.html#html-filter'),
-    'STATISTICS': chrome.runtime.getURL('pages/statistics/statistics.html'),
+    'WELCOME': browser.runtime.getURL('pages/welcome/welcome.html'),
+    'DONATE': browser.runtime.getURL('pages/donate/donate.html'),
+    'CHANGELOG': browser.runtime.getURL('pages/updates/updates.html'),
+    'FAQ': browser.runtime.getURL('pages/help/help.html'),
+    'FAQ_HTML_FILTER': browser.runtime.getURL('pages/help/help.html#html-filter'),
+    'STATISTICS': browser.runtime.getURL('pages/statistics/statistics.html'),
     'LOCALCDN_TEST': 'https://www.localcdn.org/test',
     'LOCALCDN_TEST_WEBSITE': 'https://www.localcdn.org/test/check',
     'WEBLATE': 'https://hosted.weblate.org/projects/localcdn/localcdn/',
-    'LOGGING': chrome.runtime.getURL('pages/logging/logging.html'),
+    'LOGGING': browser.runtime.getURL('pages/logging/logging.html'),
 };
 
 const CDNs = {
@@ -447,6 +460,9 @@ const ReqAnalyzer = {
     'BUNDLE_SCROLLMAGIC': 'ScrollMagic (Bundle)',
     'BUNDLE_FONT_AWESOME': 'Font Awesome (Fonts) (Bundle)',
     'BUNDLE_PURE_CSS': 'Pure CSS (Bundle)',
+    'BUNDLE_JQUERY_LAZY': 'jQuery Lazy (Bundle)',
+    'BUNDLE_SEMANTIC_UI': 'Semantic UI (Bundle)',
+    'BUNDLE_ELEMENT_UI': 'ElementUI (Bundle)',
 };
 
 /**

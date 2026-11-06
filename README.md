@@ -84,6 +84,34 @@ Please read this [guide](https://codeberg.org/nobody/LocalCDN/wiki/Home#user-con
 
 > **Important:** All tagged commits are signed with GPG. It's likely best to ignore unsigned commits, unless you really know what you're doing. Please send an email if you have any questions or security concerns.
 
+## Enterprise policies
+
+LocalCDN can be configured with [enterprise policies](https://mozilla.github.io/policy-templates/#3rdparty) in Firefox, e.g. for a declarative setup. The settings of the policy are applied on every start of the browser and are locked in the options and in the popup.
+
+All keys of the settings export (*Options* → *Other* → *Export Data*) can be used, except `amountInjected`, `internalStatisticsData`, `lastMappingUpdate` and `storageType`. Invalid values are ignored. In addition, `hideWelcomePage` prevents the welcome page from being opened after the installation.
+
+Example of a `policies.json`:
+
+```json
+{
+  "policies": {
+    "3rdparty": {
+      "Extensions": {
+        "{b86e4813-687a-43e6-ab65-0bde4ab75758}": {
+          "hideWelcomePage": true,
+          "updateNotification": 0,
+          "blockMissing": true,
+          "allowlistedDomains": {
+            "example.com": true,
+            "*.example.org": true
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 ## Contact
 
 Just open an issue with your question or write an [email](https://www.localcdn.org/contact/) (PGP possible!).
@@ -95,7 +123,7 @@ The language you want is not completely translated or you are a language talent?
 
 LocalCDN is free and open-source. If you like LocalCDN you can support continued development by making a donation. Any help would be greatly appreciated!
 
-* IBAN: `DE22 5003 1000 1069 4660 16` (BIC: `TRODDEF1XXX`)
+* IBAN: `DE12 4306 0967 1371 6550 01` (BIC: `GENODEM1GLS`)
 * Bitcoin: `1C4GRNyuUFkp9dMDjUkV4TwDwdfxdgLzde`
 * Ether: `0x2df49c1186f8b615c2059f29c3ed7f9f86d49552`
 * Monero: `46j26ggSZNT9rN7VeFYXp2PsKEMyJSSYneBVKXY4xeemdfZfCpNg6tQEXQZpWiTTuGX3SbnDPwuh3167cCoYSrqN72H9jPk`

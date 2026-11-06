@@ -39,11 +39,11 @@ helpers.insertI18nContentIntoDocument = function (document) {
     i18nElements.forEach(function (i18nElement) {
         const i18nMessageName = i18nElement.getAttribute('data-i18n-content');
 
-        if (chrome.i18n.getMessage(i18nMessageName) !== '') {
+        if (browser.i18n.getMessage(i18nMessageName) !== '') {
             if (i18nElement.type === 'button') {
-                i18nElement.value = chrome.i18n.getMessage(i18nMessageName);
+                i18nElement.value = browser.i18n.getMessage(i18nMessageName);
             } else {
-                i18nElement.textContent = chrome.i18n.getMessage(i18nMessageName);
+                i18nElement.textContent = browser.i18n.getMessage(i18nMessageName);
             }
             i18nElement.setAttribute('dir', scriptDirection);
         } else {
@@ -61,7 +61,7 @@ helpers.insertI18nTitlesIntoDocument = function (document) {
     i18nElements.forEach(function (i18nElement) {
         let i18nMessageName = i18nElement.getAttribute('data-i18n-title');
 
-        i18nElement.setAttribute('title', chrome.i18n.getMessage(i18nMessageName));
+        i18nElement.setAttribute('title', browser.i18n.getMessage(i18nMessageName));
         i18nElement.setAttribute('dir', scriptDirection);
     });
 };
@@ -214,21 +214,6 @@ helpers.extractFilenameFromPath = function (path) {
     return filename === '' ? pathSegments[1] : filename;
 };
 
-helpers.generateRandomHexString = function (length) {
-    let randomHexString;
-
-    const randomValues = crypto.getRandomValues(new Uint8Array(length));
-    randomHexString = '';
-
-    for (const value of randomValues) {
-        // eslint-disable-next-line no-bitwise
-        const hexValue = (0 ^ (value & (15 >> (0 / 4)))).toString(16);
-        randomHexString += hexValue;
-    }
-
-    return randomHexString;
-};
-
 helpers.determineCdnName = function (domainName) {
     return CDNs[domainName] || 'Unknown';
 };
@@ -236,9 +221,10 @@ helpers.determineCdnName = function (domainName) {
 helpers.determineScriptDirection = function (language) {
     let scriptDirection;
 
-    const rightToLeftLanguages = ['ar', 'he'];
+    const rightToLeftLanguages = ['ar', 'fa', 'he'];
+    const primaryLanguage = language.split(/[-_]/)[0].toLowerCase();
 
-    if (rightToLeftLanguages.indexOf(language) === -1) {
+    if (rightToLeftLanguages.indexOf(primaryLanguage) === -1) {
         scriptDirection = 'ltr';
     } else {
         scriptDirection = 'rtl';
@@ -254,14 +240,14 @@ helpers.determineActiveTab = function () {
             'currentWindow': true
         };
 
-        chrome.tabs.query(opt, function (tabs) {
+        browser.tabs.query(opt, function (tabs) {
             if (tabs[0]) {
                 resolve(tabs[0]);
             } else {
                 opt = {'active': true};
 
-                chrome.tabs.query(opt, function () {
-                    resolve(tabs[0]);
+                browser.tabs.query(opt, function (fallbackTabs) {
+                    resolve(fallbackTabs[0]);
                 });
             }
         });
@@ -277,7 +263,6 @@ helpers.formatNumber = function (number) {
 
 helpers.formatFilename = function (targetPath) {
     if (targetPath.startsWith('resources/element-ui/')) {
-        targetPath = targetPath.toLowerCase();
         if (!targetPath.endsWith('.min.jsm')) {
             targetPath = targetPath.replace('.jsm', '.min.jsm');
         }
@@ -305,6 +290,32 @@ helpers.compareVersion = function (v1, v2) {
         }
     }
     return v1.length === v2.length ? true : v1.length < v2.length ? false : true;
+};
+
+helpers.throttle = function (callback, interval) {
+    // Runs the first call immediately, further calls at most once per interval (the last one is never lost)
+    let timeout = null;
+    let pending = false;
+
+    const wait = function () {
+        timeout = setTimeout(function () {
+            timeout = null;
+            if (pending) {
+                pending = false;
+                callback();
+                wait();
+            }
+        }, interval);
+    };
+
+    return function () {
+        if (timeout === null) {
+            callback();
+            wait();
+        } else {
+            pending = true;
+        }
+    };
 };
 
 helpers.isGoogleDomain = function (initiatorDomain) {

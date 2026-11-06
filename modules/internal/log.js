@@ -23,7 +23,6 @@ const log = {};
 
 log.data = [];
 log._timer = null;
-log.MAX_ENTRIES = 5000;
 
 log.persist = function () {
     if (log._timer !== null) {
@@ -38,10 +37,16 @@ log.persist = function () {
 log.append = function (initiator, resource, target, highlight, iframe = '') {
     if (stateManager.logging) {
         log.data.push({initiator, resource, target, highlight, iframe});
-        if (log.data.length > log.MAX_ENTRIES) {
-            log.data.splice(0, log.data.length - log.MAX_ENTRIES);
+        if (log.data.length > LogMaxEntries) {
+            log.data.splice(0, log.data.length - LogMaxEntries);
         }
         log.persist();
+    }
+};
+
+log.console = function (message) {
+    if (stateManager.logging) {
+        console.log(message);
     }
 };
 

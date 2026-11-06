@@ -87,7 +87,7 @@ logging._deleteLogs = function () {
             'value': '',
         };
 
-        chrome.runtime.sendMessage(message);
+        browser.runtime.sendMessage(message);
         logging._resfresh();
     }
 };
@@ -98,7 +98,7 @@ logging._getLoggingData = function () {
             'topic': 'logs:get'
         };
 
-        chrome.runtime.sendMessage(message, function (data) {
+        browser.runtime.sendMessage(message, function (data) {
             logging._data = data['logs'];
             resolve();
         });

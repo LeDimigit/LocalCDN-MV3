@@ -42,12 +42,10 @@ options._renderContents = function () {
         options._renderLocaleNotice();
     }
 
-    if (!BrowserType.FIREFOX) {
-        document.getElementById('chromium-banner').style.display = 'block';
-        document.getElementById('div-html-badge').style.display = 'none';
-    }
+    // The HTML filter (Firefox only) does not exist in this Chromium build
+    document.getElementById('div-html-badge').style.display = 'none';
 
-    document.getElementById('label-version').textContent = chrome.runtime.getManifest().version;
+    document.getElementById('label-version').textContent = browser.runtime.getManifest().version;
 };
 
 options._renderOptionsPanel = function () {
@@ -70,6 +68,7 @@ options._renderOptionsPanel = function () {
         'stripMetadata': options._optionValues.stripMetadata,
         'internalStatistics': options._internalStatistics,
         'hideDonationButton': options._optionValues.hideDonationButton,
+        'hideCounters': options._optionValues.hideCounters,
         'allowlistedDomains': domainAllowlist
     };
 
@@ -91,7 +90,7 @@ options._renderOptionsPanel = function () {
         'badgeHTMLfilterTextColor': options._optionValues.badgeHTMLfilterTextColor,
         'badgeMissingResourceBackgroundColor': options._optionValues.badgeMissingResourceBackgroundColor,
         'badgeMissingResourceTextColor': options._optionValues.badgeMissingResourceTextColor,
-        'storageType': options._optionValues.storageType
+        'storageType': options._storageType
     };
 
     options._registerMiscellaneousEventListeners();
@@ -112,6 +111,36 @@ options._renderOptionsPanel = function () {
     document.getElementById('btn-general-tab').addEventListener('click', options._changeTab);
     document.getElementById('btn-advanced-tab').addEventListener('click', options._changeTab);
     document.getElementById('btn-export-import-tab').addEventListener('click', options._changeTab);
+
+    browser.runtime.sendMessage({'topic': 'settings:get-managed'}, options._lockManagedOptions);
+};
+
+options._lockManagedOptions = function (response) {
+    // Settings of an enterprise policy can't be changed
+    const managedKeys = Object.keys((response && response.value) || {});
+
+    if (managedKeys.length === 0) {
+        return;
+    }
+    document.getElementById('managed-banner').style.display = 'block';
+
+    for (const key of managedKeys) {
+        for (const element of document.querySelectorAll(`[data-option=${key}]`)) {
+            element.disabled = true;
+            element.title = browser.i18n.getMessage('managedSetting');
+
+            if (element.type === 'checkbox') {
+                element.closest('.option').classList.add('option-disabled');
+            }
+            // Button to restore the default color
+            if (element.nextElementSibling && element.nextElementSibling.classList.contains('img-restore-color')) {
+                element.nextElementSibling.style.display = 'none';
+            }
+        }
+        if (key === Setting.BLOCK_MISSING) {
+            document.getElementById('button-block-missing').style.display = 'none';
+        }
+    }
 };
 
 options._renderBlockMissingNotice = function () {
@@ -157,12 +186,12 @@ options._determineOptionValues = function () {
         optionKeys = Object.keys(optionList);
 
         if (options._storageType === 'sync') {
-            chrome.storage.sync.get(optionKeys, function (items) {
+            browser.storage.sync.get(optionKeys, function (items) {
                 options._optionValues = items;
                 resolve();
             });
         } else {
-            chrome.storage.local.get(optionKeys, function (items) {
+            browser.storage.local.get(optionKeys, function (items) {
                 options._optionValues = items;
                 resolve();
             });
@@ -172,7 +201,7 @@ options._determineOptionValues = function () {
 
 options._determineLocalOptionValues = function () {
     return new Promise((resolve) => {
-        chrome.storage.local.get([Setting.INTERNAL_STATISTICS, Setting.STORAGE_TYPE], function (items) {
+        browser.storage.local.get([Setting.INTERNAL_STATISTICS, Setting.STORAGE_TYPE], function (items) {
             options._internalStatistics = items.internalStatistics;
             options._storageType = items.storageType;
             resolve();
@@ -187,9 +216,9 @@ options.getOptionElement = function (optionKey) {
 options._configureLinkPrefetching = function (value) {
     if (value === false) {
         // Restore default values of related preference values.
-        chrome.privacy.network.networkPredictionEnabled.clear({});
+        browser.privacy.network.networkPredictionEnabled.clear({});
     } else {
-        chrome.privacy.network.networkPredictionEnabled.set({
+        browser.privacy.network.networkPredictionEnabled.set({
             'value': false,
         });
     }
@@ -281,24 +310,24 @@ options.onOptionChanged = function ({target}) {
             break;
         case Setting.LOGGING:
             if (optionValue === false) {
-                chrome.runtime.sendMessage({'topic': 'logs:delete', 'value': ''});
+                browser.runtime.sendMessage({'topic': 'logs:delete', 'value': ''});
             }
             break;
     }
 
     if (options._storageType === 'sync' && optionKey !== 'internalStatistics') {
-        chrome.storage.sync.set({
+        browser.storage.sync.set({
             [optionKey]: optionValue,
         });
     } else {
-        chrome.storage.local.set({
+        browser.storage.local.set({
             [optionKey]: optionValue,
         });
     }
 };
 
 options._onLinkClick = function (url) {
-    chrome.tabs.create({
+    browser.tabs.create({
         'url': url,
         'active': true
     });

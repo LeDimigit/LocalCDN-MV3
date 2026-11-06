@@ -30,21 +30,9 @@ const requestAnalyzer = {};
  * Public Methods
  */
 
-requestAnalyzer.isValidCandidate = function (requestDetails, tabDetails) {
-    let initiatorDomain = helpers.extractDomainFromUrl(tabDetails.url, true);
-
-    if (initiatorDomain === null) {
-        initiatorDomain = Address.EXAMPLE;
-    }
-
+requestAnalyzer.isValidCandidate = function (requestDetails, tabDetails, requestedDomain) {
     // If requested Domain not in mappings.js it is not relevant
-    const requestedDomain = helpers.extractDomainFromUrl(requestDetails.url, true);
     if (mappings['cdn'][requestedDomain] === undefined) {
-        return false;
-    }
-
-    const isAllowlisted = helpers.checkAllowlisted(initiatorDomain, requestAnalyzer.allowlistedDomains);
-    if (isAllowlisted) {
         return false;
     }
 
@@ -93,11 +81,10 @@ requestAnalyzer.isGoogleFont = function (domain) {
     return domain.includes('fonts.googleapis.com') || domain.includes('fonts.gstatic.com');
 };
 
-requestAnalyzer.getLocalTarget = function (requestDetails, initiator) {
+requestAnalyzer.getLocalTarget = function (requestDetails, initiator, destinationUrl = new URL(requestDetails.url)) {
     let destinationSearchString;
 
     destinationSearchString = '';
-    const destinationUrl = new URL(requestDetails.url);
 
     const destinationHost = destinationUrl.host;
     const destinationPath = destinationUrl.pathname;
@@ -134,6 +121,24 @@ requestAnalyzer.getLocalTarget = function (requestDetails, initiator) {
         destinationSearchString,
         initiator
     );
+};
+
+requestAnalyzer.isLocallyAvailable = function (url) {
+    // Checks whether a resource can be replaced, without logging (initiator null)
+    let host, targetDetails;
+
+    try {
+        host = new URL(url).host;
+        if (mappings.cdn[host] === undefined) {
+            return false;
+        }
+        targetDetails = requestAnalyzer.getLocalTarget({url}, null);
+    } catch (exception) {
+        // Unknown cases are treated as not available, so the integrity check is kept
+        return false;
+    }
+
+    return targetDetails['result'] !== false && targetDetails['result'] !== 'blocked';
 };
 
 
@@ -182,8 +187,10 @@ requestAnalyzer._findLocalTarget = function (resourceMappings, basePath, channel
 
     shorthandResource = shorthands.specialFiles(channelHost, channelPath, destinationSearchString);
     if (shorthandResource['result'] !== false) {
-        console.log(`${LogString.PREFIX} ${LogString.REPLACED_RESOURCE} ${shorthandResource.path}`);
-        log.append(initiator, channelHost + channelPath, shorthandResource.path, false);
+        if (initiator !== null) {
+            log.console(`${LogString.PREFIX} ${LogString.REPLACED_RESOURCE} ${shorthandResource.path}`);
+            log.append(initiator, channelHost + channelPath, shorthandResource.path, false);
+        }
         return shorthandResource;
     }
 
@@ -241,8 +248,7 @@ requestAnalyzer._findLocalTarget = function (resourceMappings, basePath, channel
     }
 
     if (!IgnoredHost[channelHost]) {
-        console.warn(`${LogString.PREFIX} ${LogString.MISSING_RESOURCE} ${channelHost}${channelPath}`);
-        log.append(initiator, channelHost + channelPath, '-', true);
+        requestAnalyzer._logMissingResource(initiator, channelHost + channelPath);
     }
 
     if (Object.keys(mappings.cdn).includes(helpers.extractDomainFromUrl(initiator, true))) {
@@ -252,6 +258,15 @@ requestAnalyzer._findLocalTarget = function (resourceMappings, basePath, channel
     return {
         'result': false,
     };
+};
+
+requestAnalyzer._logMissingResource = function (initiator, resource) {
+    // No logging if only the availability of a resource is checked
+    if (initiator === null) {
+        return;
+    }
+    console.warn(`${LogString.PREFIX} ${LogString.MISSING_RESOURCE} ${resource}`);
+    log.append(initiator, resource, '-', true);
 };
 
 requestAnalyzer._redirectTargetFile = function (targetPath) {
@@ -274,6 +289,10 @@ requestAnalyzer._getPathOfBundle = function (initiator, channelHost, channelPath
         filename = requestAnalyzer._handleFontawesomeFiles(targetPath, filename);
     } else if (bundle === ReqAnalyzer.BUNDLE_PURE_CSS) {
         filename = (filename === 'pure-min.css' ? 'pure.min.css' : filename);
+    } else if (bundle === ReqAnalyzer.BUNDLE_JQUERY_LAZY || bundle === ReqAnalyzer.BUNDLE_SEMANTIC_UI) {
+        filename = requestAnalyzer._getSubpathOfBundle(channelPath, targetPath);
+    } else if (bundle === ReqAnalyzer.BUNDLE_ELEMENT_UI && filename.endsWith('.woff')) {
+        filename = `fonts/${filename}`;
     }
 
     if (filename === false) {
@@ -285,6 +304,13 @@ requestAnalyzer._getPathOfBundle = function (initiator, channelHost, channelPath
     return helpers.formatFilename(filename.endsWith('.js')
         ? `${targetPath + filename}m`
         : targetPath + filename);
+};
+
+requestAnalyzer._getSubpathOfBundle = function (channelPath, targetPath) {
+    // Keep the subdirectories after the version, e.g. plugins/ or components/
+    let folder = targetPath.split('/')[1];
+    let subpath = channelPath.split(`/${folder}/`).pop();
+    return subpath.slice(subpath.indexOf('/') + 1).replace(/^\/+/, '');
 };
 
 requestAnalyzer._handleMathJax = function (channelPath, channelHost, initiator) {
@@ -299,8 +325,7 @@ requestAnalyzer._handleMathJax = function (channelPath, channelHost, initiator) 
         filename = 'config/TeX-AMS_HTML-full.js';
     }
     if (!MathJaxFiles[filename] && !MathJax3Files[filename] && !MathJax4Files[filename]) {
-        console.warn(`${LogString.PREFIX} ${LogString.MISSING_RESOURCE} ${channelHost + channelPath}`);
-        log.append(initiator, channelHost + channelPath, '-', true);
+        requestAnalyzer._logMissingResource(initiator, channelHost + channelPath);
         return false;
     }
     return filename;
@@ -318,8 +343,7 @@ requestAnalyzer._handleUncompressedFiles = function (filename) {
 requestAnalyzer._handleTinyMCE = function (channelPath, channelHost, initiator) {
     const filename = channelPath.replace(Resource.TINYMCE, '');
     if (filename.startsWith('plugins/')) {
-        console.warn(`${LogString.PREFIX} ${LogString.MISSING_RESOURCE} ${channelHost + channelPath}`);
-        log.append(initiator, channelHost + channelPath, '-', true);
+        requestAnalyzer._logMissingResource(initiator, channelHost + channelPath);
         return false;
     }
     return filename;
@@ -343,21 +367,29 @@ requestAnalyzer._applyManipulateDOMDomains = function () {
     });
 };
 
+requestAnalyzer._handleStorageChanged = function (changes) {
+    if (Setting.ALLOWLISTED_DOMAINS in changes) {
+        requestAnalyzer._applyAllowlistedDomains();
+    }
+    if (Setting.DOMAINS_MANIPULATE_DOM in changes) {
+        requestAnalyzer._applyManipulateDOMDomains();
+    }
+};
+
 
 /**
  * Initializations
  */
 
 requestAnalyzer.allowlistedDomains = {};
-requestAnalyzer._applyAllowlistedDomains();
+storageManager.ready.then(requestAnalyzer._applyAllowlistedDomains);
 
 requestAnalyzer.domainsManipulateDOM = {};
-requestAnalyzer._applyManipulateDOMDomains();
+storageManager.ready.then(requestAnalyzer._applyManipulateDOMDomains);
 
 
 /**
  * Event Handlers
  */
 
-chrome.storage.onChanged.addListener(requestAnalyzer._applyAllowlistedDomains);
-chrome.storage.onChanged.addListener(requestAnalyzer._applyManipulateDOMDomains);
+browser.storage.onChanged.addListener(requestAnalyzer._handleStorageChanged);

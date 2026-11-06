@@ -25,6 +25,7 @@ stateManager.showIconBadge = true;
 stateManager.internalStatistics = false;
 stateManager.hideDonationButton = false;
 stateManager.changeBadgeColorMissingResources = false;
+stateManager.hideCounters = false;
 stateManager.logging = false;
 
 stateManager._newTab = function () {
@@ -54,7 +55,7 @@ stateManager.refreshBadge = function (tabIdentifier) {
     const blockedCount = registeredTab.blocked || 0;
 
     if (injectionCount > 0) {
-        chrome.action.setTitle({'tabId': tabIdentifier, 'title': `LocalCDN (${injectionCount})`}).catch(() => {});
+        wrappers.setTitle(tabIdentifier, `LocalCDN (${injectionCount})`);
     }
 
     if (stateManager.showIconBadge === true) {
@@ -78,8 +79,11 @@ stateManager.registerInjection = function (tabIdentifier, injection) {
     stateManager.refreshBadge(tabIdentifier);
     stateManager.persist();
 
-    storageManager.amountInjected = (Number(storageManager.amountInjected) || 0) + 1;
-    chrome.storage.local.set({[Setting.AMOUNT_INJECTED]: storageManager.amountInjected});
+    if (isNaN(storageManager.amountInjected)) {
+        storageManager.amountInjected = 0;
+    }
+    ++storageManager.amountInjected;
+    stateManager._saveAmountInjected();
 
     if (stateManager.internalStatistics) {
         stats.setStats(injection);
@@ -181,11 +185,12 @@ stateManager._updateTab = async function (details) {
     const tabIdentifier = details.tabId;
     const tabDomain = helpers.extractDomainFromUrl(details.url, true);
 
-    chrome.action.setTitle({'tabId': tabIdentifier, 'title': 'LocalCDN (0)'}).catch(() => {});
+    wrappers.resetTab(tabIdentifier);
+    wrappers.setTitle(tabIdentifier, 'LocalCDN (0)');
 
     if (stateManager._domainIsListed(tabDomain)) {
         stateManager._setIconDisabled(tabIdentifier);
-        chrome.action.setTitle({'tabId': tabIdentifier, 'title': 'LocalCDN (–)'}).catch(() => {});
+        wrappers.setTitle(tabIdentifier, 'LocalCDN (–)');
     }
 
     if (stateManager.showIconBadge === true) {
@@ -204,30 +209,53 @@ stateManager._handleStorageChanged = function (changes) {
                 tabs.forEach((tab) => stateManager._clearBadgeText(tab.id));
             });
         }
-    } else if (Setting.NEGATE_HTML_FILTER_LIST in changes) {
+    }
+    if (Setting.NEGATE_HTML_FILTER_LIST in changes) {
         stateManager.getInvertOption = changes.negateHtmlFilterList.newValue;
-    } else if (Setting.SELECTED_ICON in changes) {
+    }
+    if (Setting.SELECTED_ICON in changes) {
         stateManager.selectedIcon = changes.selectedIcon.newValue;
-    } else if (Setting.INTERNAL_STATISTICS in changes) {
+    }
+    if (Setting.INTERNAL_STATISTICS in changes) {
         stateManager.internalStatistics = changes.internalStatistics.newValue;
-    } else if (Setting.INTERNAL_STATISTICS_DATA in changes) {
-        stats.data = changes.internalStatisticsData.newValue;
-    } else if (Setting.HIDE_DONATION_BUTTON in changes) {
+    }
+    if (Setting.HIDE_DONATION_BUTTON in changes) {
         stateManager.hideDonationButton = changes.hideDonationButton.newValue;
-    } else if (Setting.CHANGE_BADGE_COLOR_MISSING_RESOURCES in changes) {
+    }
+    if (Setting.HIDE_COUNTERS in changes) {
+        stateManager.hideCounters = changes.hideCounters.newValue;
+    }
+    if (Setting.CHANGE_BADGE_COLOR_MISSING_RESOURCES in changes) {
         stateManager.changeBadgeColorMissingResources = changes.changeBadgeColorMissingResources.newValue;
-    } else if (Setting.LOGGING in changes) {
+    }
+    if (Setting.LOGGING in changes) {
         stateManager.logging = changes.enableLogging.newValue;
-    } else if (Setting.BADGE_DEFAULT_TEXT_COLOR in changes) {
+    }
+    if (Setting.BADGE_DEFAULT_TEXT_COLOR in changes) {
         wrappers.badgeDefaultTextColor = changes.badgeDefaultTextColor.newValue;
-    } else if (Setting.BADGE_DEFAULT_BACKGROUND_COLOR in changes) {
+    }
+    if (Setting.BADGE_DEFAULT_BACKGROUND_COLOR in changes) {
         wrappers.badgeDefaultBackgroundColor = changes.badgeDefaultBackgroundColor.newValue;
-    } else if (Setting.BADGE_HTML_FILTER_TEXT_COLOR in changes) {
+    }
+    if (Setting.BADGE_HTML_FILTER_TEXT_COLOR in changes) {
         wrappers.badgeHTMLfilterTextColor = changes.badgeHTMLfilterTextColor.newValue;
-    } else if (Setting.BADGE_HTML_FILTER_BACKGROUND_COLOR in changes) {
+    }
+    if (Setting.BADGE_HTML_FILTER_BACKGROUND_COLOR in changes) {
         wrappers.badgeHTMLFilterBackgroundColor = changes.badgeHTMLFilterBackgroundColor.newValue;
     }
+    if (Setting.BADGE_MISSING_RESOURCE_TEXT_COLOR in changes) {
+        wrappers.badgeMissingResourceTextColor = changes.badgeMissingResourceTextColor.newValue;
+    }
+    if (Setting.BADGE_MISSING_RESOURCE_BACKGROUND_COLOR in changes) {
+        wrappers.badgeMissingResourceBackgroundColor = changes.badgeMissingResourceBackgroundColor.newValue;
+    }
 };
+
+stateManager._saveAmountInjected = helpers.throttle(function () {
+    chrome.storage.local.set({
+        [Setting.AMOUNT_INJECTED]: storageManager.amountInjected
+    });
+}, StorageWriteInterval);
 
 /**
  * Initialization (restores state after the service worker was stopped)

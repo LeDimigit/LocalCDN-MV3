@@ -350,7 +350,7 @@ const resources = {
     },
     // docsify themes
     'docsifyThemeDefault': {
-        'path': 'resources/docsify-themeable/{version}/theme-default.css'
+        'path': 'resources/docsify-themeable/{version}/theme-defaults.css'
     },
     'docsifyThemeSimple': {
         'path': 'resources/docsify-themeable/{version}/theme-simple.css'
@@ -613,7 +613,7 @@ const resources = {
     },
     // jQuery Tablesorter
     'jQueryTablesorter': {
-        'path': 'resources/jquery.tablesorter/{version}/jquery.tablesorter.min.jsm'
+        'path': 'resources/jquery.tablesorter/{version}/js/jquery.tablesorter.min.jsm'
     },
     // jquery-timeago
     'jqueryTimeago': {
@@ -721,7 +721,7 @@ const resources = {
     },
     // lightGallery
     'lightGalleryJS': {
-        'path': 'resources/lightgallery/{version}/js/lightgallery-all.min.jsm'
+        'path': 'resources/lightgallery/{version}/js/lightgallery.min.jsm'
     },
     'lightGalleryCSS': {
         'path': 'resources/lightgallery/{version}/css/lightgallery.min.css'

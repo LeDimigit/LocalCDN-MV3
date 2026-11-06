@@ -255,6 +255,10 @@
         "message": "Hide donation button",
         "description": "Hide donation button"
     },
+    "hideCounters": {
+        "message": "Hide counters in the popup",
+        "description": "Hide the counters of replaced, blocked and missing resources in the popup"
+    },
     "betaLabel": {
         "message": "Beta",
         "description": "beta"
@@ -526,5 +530,13 @@
     "permissionMoreInfo": {
         "message": "More info",
         "description": "More info"
+    },
+    "managedSettingsNotice": {
+        "message": "Some settings are managed by your administrator and can't be changed.",
+        "description": "Notice if settings are set by an enterprise policy"
+    },
+    "managedSetting": {
+        "message": "Managed by your administrator",
+        "description": "Tooltip of a setting which is set by an enterprise policy"
     }
 }

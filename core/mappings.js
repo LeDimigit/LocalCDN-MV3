@@ -417,6 +417,8 @@ mappings.cdn = {
             'lightcase/{version}/js/lightcase.': resources.lightcaseJS,
             'lightgallery/{version}/css/lightgallery.': resources.lightGalleryCSS,
             'lightgallery/{version}/js/lightgallery.': resources.lightGalleryJS,
+            'lightgallery/{version}/lightgallery.min.js': resources.lightGalleryJS,
+            'lightgallery/{version}/lightgallery.umd.js': resources.lightGalleryJS,
             'lodash.js/{version}/lodash.': resources.lodashJS,
             'lozad.js/{version}/lozad.': resources.lozad,
             'lunr.js/{version}/lunr.': resources.lunrJS,

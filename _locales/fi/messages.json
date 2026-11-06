@@ -255,6 +255,10 @@
         "message": "Piiloita lahjoitus nappi",
         "description": "Hide donation button"
     },
+    "hideCounters": {
+        "message": "",
+        "description": "Hide the counters of replaced, blocked and missing resources in the popup"
+    },
     "betaLabel": {
         "message": "Beta",
         "description": "beta"
@@ -526,5 +530,13 @@
     "permissionMoreInfo": {
         "message": "Lisätietoja",
         "description": "More info"
+    },
+    "managedSettingsNotice": {
+        "message": "",
+        "description": "Notice if settings are set by an enterprise policy"
+    },
+    "managedSetting": {
+        "message": "",
+        "description": "Tooltip of a setting which is set by an enterprise policy"
     }
 }

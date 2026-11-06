@@ -61,14 +61,14 @@ interceptor.handleRequest = async function (requestDetails) {
     }
 
     const tabDetails = {'url': tabUrl};
-    if (!requestAnalyzer.isValidCandidate(requestDetails, tabDetails)) {
+    const targetDomain = helpers.extractDomainFromUrl(requestDetails.url, true);
+    if (!requestAnalyzer.isValidCandidate(requestDetails, tabDetails, targetDomain)) {
         return;
     }
 
     const targetDetails = requestAnalyzer.getLocalTarget(requestDetails, tabUrl);
 
     if (targetDetails['result'] === false || targetDetails['result'] === 'blocked' || !targetDetails.path) {
-        const targetDomain = helpers.extractDomainFromUrl(requestDetails.url, true);
         if (!IgnoredHost[targetDomain]) {
             ++registeredTab.missing;
         }
