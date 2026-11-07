@@ -24,8 +24,8 @@ stateManager.selectedIcon = 'Default';
 stateManager.showIconBadge = true;
 stateManager.internalStatistics = false;
 stateManager.hideDonationButton = false;
-stateManager.changeBadgeColorMissingResources = false;
 stateManager.hideCounters = false;
+stateManager.changeBadgeColorMissingResources = false;
 stateManager.logging = false;
 
 stateManager._newTab = function () {
@@ -55,7 +55,7 @@ stateManager.refreshBadge = function (tabIdentifier) {
     const blockedCount = registeredTab.blocked || 0;
 
     if (injectionCount > 0) {
-        wrappers.setTitle(tabIdentifier, `LocalCDN (${injectionCount})`);
+        chrome.action.setTitle({'tabId': tabIdentifier, 'title': `LocalCDN (${injectionCount})`}).catch(() => {});
     }
 
     if (stateManager.showIconBadge === true) {
@@ -79,10 +79,7 @@ stateManager.registerInjection = function (tabIdentifier, injection) {
     stateManager.refreshBadge(tabIdentifier);
     stateManager.persist();
 
-    if (isNaN(storageManager.amountInjected)) {
-        storageManager.amountInjected = 0;
-    }
-    ++storageManager.amountInjected;
+    storageManager.amountInjected = (Number(storageManager.amountInjected) || 0) + 1;
     stateManager._saveAmountInjected();
 
     if (stateManager.internalStatistics) {
@@ -185,12 +182,11 @@ stateManager._updateTab = async function (details) {
     const tabIdentifier = details.tabId;
     const tabDomain = helpers.extractDomainFromUrl(details.url, true);
 
-    wrappers.resetTab(tabIdentifier);
-    wrappers.setTitle(tabIdentifier, 'LocalCDN (0)');
+    chrome.action.setTitle({'tabId': tabIdentifier, 'title': 'LocalCDN (0)'}).catch(() => {});
 
     if (stateManager._domainIsListed(tabDomain)) {
         stateManager._setIconDisabled(tabIdentifier);
-        wrappers.setTitle(tabIdentifier, 'LocalCDN (–)');
+        chrome.action.setTitle({'tabId': tabIdentifier, 'title': 'LocalCDN (–)'}).catch(() => {});
     }
 
     if (stateManager.showIconBadge === true) {
@@ -251,12 +247,6 @@ stateManager._handleStorageChanged = function (changes) {
     }
 };
 
-stateManager._saveAmountInjected = helpers.throttle(function () {
-    chrome.storage.local.set({
-        [Setting.AMOUNT_INJECTED]: storageManager.amountInjected
-    });
-}, StorageWriteInterval);
-
 /**
  * Initialization (restores state after the service worker was stopped)
  */
@@ -300,5 +290,9 @@ chrome.webRequest.onBeforeRequest.addListener(async function (requestDetails) {
 }, {'types': [WebRequestType.MAIN_FRAME], 'urls': [Address.ANY]});
 
 chrome.webNavigation.onCommitted.addListener(stateManager._updateTab, {'url': [{'urlContains': ':'}]});
+
+stateManager._saveAmountInjected = helpers.throttle(function () {
+    chrome.storage.local.set({[Setting.AMOUNT_INJECTED]: storageManager.amountInjected});
+}, StorageWriteInterval);
 
 chrome.storage.onChanged.addListener(stateManager._handleStorageChanged);

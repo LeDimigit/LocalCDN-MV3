@@ -18,11 +18,6 @@
 
 'use strict';
 
-// Chromium (Manifest V3): the 'browser' namespace is an alias of 'chrome' (promise based)
-if (typeof browser === 'undefined') {
-    globalThis.browser = chrome;
-}
-
 /**
  * Constants
  */
@@ -205,69 +200,69 @@ const Allowlist = {
 };
 
 const BrowserType = {
-    'CHROMIUM': browser.runtime.getURL('/').startsWith('chrome-extension'),
-    'FIREFOX': browser.runtime.getURL('/').startsWith('moz-extension')
+    'CHROMIUM': chrome.runtime.getURL('/').startsWith('chrome-extension'),
+    'FIREFOX': chrome.runtime.getURL('/').startsWith('moz-extension')
 };
 
 const IconType = {
     'Default': {
         'Enabled': {
-            '16': browser.runtime.getURL('icons/action/default/icon16-default.png'),
-            '18': browser.runtime.getURL('icons/action/default/icon18-default.png'),
-            '19': browser.runtime.getURL('icons/action/default/icon19-default.png'),
-            '32': browser.runtime.getURL('icons/action/default/icon32-default.png'),
-            '36': browser.runtime.getURL('icons/action/default/icon36-default.png'),
-            '38': browser.runtime.getURL('icons/action/default/icon38-default.png'),
-            '64': browser.runtime.getURL('icons/action/default/icon64-default.png')
+            '16': chrome.runtime.getURL('icons/action/default/icon16-default.png'),
+            '18': chrome.runtime.getURL('icons/action/default/icon18-default.png'),
+            '19': chrome.runtime.getURL('icons/action/default/icon19-default.png'),
+            '32': chrome.runtime.getURL('icons/action/default/icon32-default.png'),
+            '36': chrome.runtime.getURL('icons/action/default/icon36-default.png'),
+            '38': chrome.runtime.getURL('icons/action/default/icon38-default.png'),
+            '64': chrome.runtime.getURL('icons/action/default/icon64-default.png')
         },
         'Disabled': {
-            '16': browser.runtime.getURL('icons/action/default/icon16-disabled.png'),
-            '18': browser.runtime.getURL('icons/action/default/icon18-disabled.png'),
-            '19': browser.runtime.getURL('icons/action/default/icon19-disabled.png'),
-            '32': browser.runtime.getURL('icons/action/default/icon32-disabled.png'),
-            '36': browser.runtime.getURL('icons/action/default/icon36-disabled.png'),
-            '38': browser.runtime.getURL('icons/action/default/icon38-disabled.png'),
-            '64': browser.runtime.getURL('icons/action/default/icon64-disabled.png')
+            '16': chrome.runtime.getURL('icons/action/default/icon16-disabled.png'),
+            '18': chrome.runtime.getURL('icons/action/default/icon18-disabled.png'),
+            '19': chrome.runtime.getURL('icons/action/default/icon19-disabled.png'),
+            '32': chrome.runtime.getURL('icons/action/default/icon32-disabled.png'),
+            '36': chrome.runtime.getURL('icons/action/default/icon36-disabled.png'),
+            '38': chrome.runtime.getURL('icons/action/default/icon38-disabled.png'),
+            '64': chrome.runtime.getURL('icons/action/default/icon64-disabled.png')
         }
     },
     'Light': {
         'Enabled': {
-            '16': browser.runtime.getURL('icons/action/light/icon16-default.png'),
-            '18': browser.runtime.getURL('icons/action/light/icon18-default.png'),
-            '19': browser.runtime.getURL('icons/action/light/icon19-default.png'),
-            '32': browser.runtime.getURL('icons/action/light/icon32-default.png'),
-            '36': browser.runtime.getURL('icons/action/light/icon36-default.png'),
-            '38': browser.runtime.getURL('icons/action/light/icon38-default.png'),
-            '64': browser.runtime.getURL('icons/action/light/icon64-default.png')
+            '16': chrome.runtime.getURL('icons/action/light/icon16-default.png'),
+            '18': chrome.runtime.getURL('icons/action/light/icon18-default.png'),
+            '19': chrome.runtime.getURL('icons/action/light/icon19-default.png'),
+            '32': chrome.runtime.getURL('icons/action/light/icon32-default.png'),
+            '36': chrome.runtime.getURL('icons/action/light/icon36-default.png'),
+            '38': chrome.runtime.getURL('icons/action/light/icon38-default.png'),
+            '64': chrome.runtime.getURL('icons/action/light/icon64-default.png')
         },
         'Disabled': {
-            '16': browser.runtime.getURL('icons/action/light/icon16-disabled.png'),
-            '18': browser.runtime.getURL('icons/action/light/icon18-disabled.png'),
-            '19': browser.runtime.getURL('icons/action/light/icon19-disabled.png'),
-            '32': browser.runtime.getURL('icons/action/light/icon32-disabled.png'),
-            '36': browser.runtime.getURL('icons/action/light/icon36-disabled.png'),
-            '38': browser.runtime.getURL('icons/action/light/icon38-disabled.png'),
-            '64': browser.runtime.getURL('icons/action/light/icon64-disabled.png')
+            '16': chrome.runtime.getURL('icons/action/light/icon16-disabled.png'),
+            '18': chrome.runtime.getURL('icons/action/light/icon18-disabled.png'),
+            '19': chrome.runtime.getURL('icons/action/light/icon19-disabled.png'),
+            '32': chrome.runtime.getURL('icons/action/light/icon32-disabled.png'),
+            '36': chrome.runtime.getURL('icons/action/light/icon36-disabled.png'),
+            '38': chrome.runtime.getURL('icons/action/light/icon38-disabled.png'),
+            '64': chrome.runtime.getURL('icons/action/light/icon64-disabled.png')
         }
     },
     'Grey': {
         'Enabled': {
-            '16': browser.runtime.getURL('icons/action/grey/icon16-default.png'),
-            '18': browser.runtime.getURL('icons/action/grey/icon18-default.png'),
-            '19': browser.runtime.getURL('icons/action/grey/icon19-default.png'),
-            '32': browser.runtime.getURL('icons/action/grey/icon32-default.png'),
-            '36': browser.runtime.getURL('icons/action/grey/icon36-default.png'),
-            '38': browser.runtime.getURL('icons/action/grey/icon38-default.png'),
-            '64': browser.runtime.getURL('icons/action/grey/icon64-default.png')
+            '16': chrome.runtime.getURL('icons/action/grey/icon16-default.png'),
+            '18': chrome.runtime.getURL('icons/action/grey/icon18-default.png'),
+            '19': chrome.runtime.getURL('icons/action/grey/icon19-default.png'),
+            '32': chrome.runtime.getURL('icons/action/grey/icon32-default.png'),
+            '36': chrome.runtime.getURL('icons/action/grey/icon36-default.png'),
+            '38': chrome.runtime.getURL('icons/action/grey/icon38-default.png'),
+            '64': chrome.runtime.getURL('icons/action/grey/icon64-default.png')
         },
         'Disabled': {
-            '16': browser.runtime.getURL('icons/action/grey/icon16-disabled.png'),
-            '18': browser.runtime.getURL('icons/action/grey/icon18-disabled.png'),
-            '19': browser.runtime.getURL('icons/action/grey/icon19-disabled.png'),
-            '32': browser.runtime.getURL('icons/action/grey/icon32-disabled.png'),
-            '36': browser.runtime.getURL('icons/action/grey/icon36-disabled.png'),
-            '38': browser.runtime.getURL('icons/action/grey/icon38-disabled.png'),
-            '64': browser.runtime.getURL('icons/action/grey/icon64-disabled.png')
+            '16': chrome.runtime.getURL('icons/action/grey/icon16-disabled.png'),
+            '18': chrome.runtime.getURL('icons/action/grey/icon18-disabled.png'),
+            '19': chrome.runtime.getURL('icons/action/grey/icon19-disabled.png'),
+            '32': chrome.runtime.getURL('icons/action/grey/icon32-disabled.png'),
+            '36': chrome.runtime.getURL('icons/action/grey/icon36-disabled.png'),
+            '38': chrome.runtime.getURL('icons/action/grey/icon38-disabled.png'),
+            '64': chrome.runtime.getURL('icons/action/grey/icon64-disabled.png')
         }
     }
 };
@@ -301,16 +296,16 @@ const MaterialIcons = {
 const Links = {
     'CODEBERG_HTML_FILTER': 'https://codeberg.org/nobody/LocalCDN/wiki/Home#user-content-7-a-website-looks-weird-or-cannot-be-used-if-i-deactivate-localcdn-everything-works-what-is-the-problem',
     'CODEBERG_RULESET': 'https://codeberg.org/nobody/LocalCDN/wiki/Home#user-content-6-why-do-i-need-this-rule-generator-i-use-an-adblocker-and-want-to-import-these-rules-how-does-it-work',
-    'WELCOME': browser.runtime.getURL('pages/welcome/welcome.html'),
-    'DONATE': browser.runtime.getURL('pages/donate/donate.html'),
-    'CHANGELOG': browser.runtime.getURL('pages/updates/updates.html'),
-    'FAQ': browser.runtime.getURL('pages/help/help.html'),
-    'FAQ_HTML_FILTER': browser.runtime.getURL('pages/help/help.html#html-filter'),
-    'STATISTICS': browser.runtime.getURL('pages/statistics/statistics.html'),
+    'WELCOME': chrome.runtime.getURL('pages/welcome/welcome.html'),
+    'DONATE': chrome.runtime.getURL('pages/donate/donate.html'),
+    'CHANGELOG': chrome.runtime.getURL('pages/updates/updates.html'),
+    'FAQ': chrome.runtime.getURL('pages/help/help.html'),
+    'FAQ_HTML_FILTER': chrome.runtime.getURL('pages/help/help.html#html-filter'),
+    'STATISTICS': chrome.runtime.getURL('pages/statistics/statistics.html'),
     'LOCALCDN_TEST': 'https://www.localcdn.org/test',
     'LOCALCDN_TEST_WEBSITE': 'https://www.localcdn.org/test/check',
     'WEBLATE': 'https://hosted.weblate.org/projects/localcdn/localcdn/',
-    'LOGGING': browser.runtime.getURL('pages/logging/logging.html'),
+    'LOGGING': chrome.runtime.getURL('pages/logging/logging.html'),
 };
 
 const CDNs = {

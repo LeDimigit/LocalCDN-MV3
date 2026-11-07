@@ -382,14 +382,14 @@ requestAnalyzer._handleStorageChanged = function (changes) {
  */
 
 requestAnalyzer.allowlistedDomains = {};
-storageManager.ready.then(requestAnalyzer._applyAllowlistedDomains);
+requestAnalyzer._applyAllowlistedDomains();
 
 requestAnalyzer.domainsManipulateDOM = {};
-storageManager.ready.then(requestAnalyzer._applyManipulateDOMDomains);
+requestAnalyzer._applyManipulateDOMDomains();
 
 
 /**
  * Event Handlers
  */
 
-browser.storage.onChanged.addListener(requestAnalyzer._handleStorageChanged);
+chrome.storage.onChanged.addListener(requestAnalyzer._handleStorageChanged);

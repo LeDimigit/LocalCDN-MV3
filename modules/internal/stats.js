@@ -60,13 +60,13 @@ stats.setStats = function (injection) {
 };
 
 stats._save = helpers.throttle(function () {
-    browser.storage.local.set({
+    chrome.storage.local.set({
         [Setting.INTERNAL_STATISTICS_DATA]: storageManager.statistics,
     });
 }, StorageWriteInterval);
 
 stats.getStats = function () {
-    browser.storage.local.get([Setting.INTERNAL_STATISTICS_DATA], function (items) {
+    chrome.storage.local.get([Setting.INTERNAL_STATISTICS_DATA], function (items) {
         storageManager.statistics = items.internalStatisticsData || {};
     });
 };

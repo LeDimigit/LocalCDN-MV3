@@ -100,6 +100,10 @@ messenger._dispatch = function (message, sender, sendResponse) {
             });
             return MessageResponse.ASYNCHRONOUS;
 
+        case 'statistic:get':
+            sendResponse({'value': storageManager.statistics});
+            return MessageResponse.SYNCHRONOUS;
+
         case 'manipulateDOM:add-domain':
             stateManager.addDomainToManipulateDOMlist(value).then(function () {
                 sendResponse({'value': true});
@@ -124,10 +128,6 @@ messenger._dispatch = function (message, sender, sendResponse) {
             });
             return MessageResponse.ASYNCHRONOUS;
 
-        case 'statistic:get':
-            sendResponse({'value': storageManager.statistics});
-            return MessageResponse.SYNCHRONOUS;
-
         case 'statistic:delete':
             storageManager.statistics = {};
             break;
@@ -140,10 +140,6 @@ messenger._dispatch = function (message, sender, sendResponse) {
             log.data = [];
             log.persist();
             break;
-
-        case 'settings:get-managed':
-            main.settingsReady.then(() => sendResponse({'value': main.managedSettings}));
-            return MessageResponse.ASYNCHRONOUS;
 
         case 'popup:get-data':
             popup.amountInjected = storageManager.amountInjected;
@@ -163,4 +159,4 @@ messenger._dispatch = function (message, sender, sendResponse) {
  * Event Handlers
  */
 
-browser.runtime.onMessage.addListener(messenger._handleMessageReceived);
+chrome.runtime.onMessage.addListener(messenger._handleMessageReceived);

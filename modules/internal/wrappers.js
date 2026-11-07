@@ -30,7 +30,7 @@ const wrappers = {};
  */
 
 wrappers.setBadgeBackgroundColor = function (details) {
-    if (browser.action.setBadgeBackgroundColor === undefined) {
+    if (chrome.action.setBadgeBackgroundColor === undefined) {
         return;
     }
 
@@ -39,7 +39,7 @@ wrappers.setBadgeBackgroundColor = function (details) {
         wrappers.badgeDefaultBackgroundColor = details.color;
     } else if (details.type === BadgeSettingHTMLFilter.TYPE) {
         storageManager.type.set({[Setting.BADGE_HTML_FILTER_BACKGROUND_COLOR]: details.color});
-        wrappers.badgeHTMLFilterBackgroundColor = details.color;
+        wrappers.badgeColorHTMLfilter = details.color;
     } else if (details.type === BadgeSettingMissingResource.TYPE) {
         storageManager.type.set({[Setting.BADGE_MISSING_RESOURCE_BACKGROUND_COLOR]: details.color});
         wrappers.badgeMissingResourceBackgroundColor = details.color;
@@ -47,7 +47,7 @@ wrappers.setBadgeBackgroundColor = function (details) {
 };
 
 wrappers.setBadgeTextColor = function (details) {
-    if (browser.action.setBadgeTextColor === undefined) {
+    if (chrome.action.setBadgeTextColor === undefined) {
         return;
     }
 
@@ -56,7 +56,7 @@ wrappers.setBadgeTextColor = function (details) {
         wrappers.badgeDefaultTextColor = details.color;
     } else if (details.type === BadgeSettingHTMLFilter.TYPE) {
         storageManager.type.set({[Setting.BADGE_HTML_FILTER_TEXT_COLOR]: details.color});
-        wrappers.badgeHTMLfilterTextColor = details.color;
+        wrappers.badgeDefaultTextColorHTMLfilter = details.color;
     } else if (details.type === BadgeSettingMissingResource.TYPE) {
         storageManager.type.set({[Setting.BADGE_MISSING_RESOURCE_TEXT_COLOR]: details.color});
         wrappers.badgeMissingResourceTextColor = details.color;
@@ -64,8 +64,8 @@ wrappers.setBadgeTextColor = function (details) {
 };
 
 wrappers.setBadgeText = function (tabId, text) {
-    if (browser.action.setBadgeText !== undefined && wrappers._isChanged(tabId, 'text', `${text}`)) {
-        browser.action.setBadgeText({
+    if (chrome.action.setBadgeText !== undefined) {
+        chrome.action.setBadgeText({
             'tabId': tabId,
             'text': `${text}`
         });
@@ -73,9 +73,9 @@ wrappers.setBadgeText = function (tabId, text) {
 };
 
 wrappers.setIcon = function (details, type) {
-    if (browser.action.setIcon) {
+    if (chrome.action.setIcon) {
         details.path = IconType[details.path][type];
-        browser.action.setIcon(details);
+        chrome.action.setIcon(details);
     }
 };
 
@@ -95,59 +95,17 @@ wrappers.setBadgeColoring = function (tabId, value) {
         return;
     }
 
-    if (!wrappers._isChanged(tabId, 'coloring', `${textColor}|${backgroundColor}`)) {
-        return;
-    }
-
-    if (browser.action.setBadgeTextColor !== undefined) {
-        browser.action.setBadgeTextColor({
+    if (chrome.action.setBadgeTextColor !== undefined) {
+        chrome.action.setBadgeTextColor({
             'tabId': tabId,
             'color': textColor
         });
     }
 
-    if (browser.action.setBadgeBackgroundColor !== undefined) {
-        browser.action.setBadgeBackgroundColor({
+    if (chrome.action.setBadgeBackgroundColor !== undefined) {
+        chrome.action.setBadgeBackgroundColor({
             'tabId': tabId,
             'color': backgroundColor
         });
     }
 };
-
-wrappers.setTitle = function (tabId, title) {
-    if (wrappers._isChanged(tabId, 'title', title)) {
-        browser.action.setTitle({
-            'tabId': tabId,
-            'title': title
-        });
-    }
-};
-
-wrappers.resetTab = function (tabId) {
-    // The browser resets tab-specific values on navigation
-    delete wrappers._tabValues[tabId];
-};
-
-
-/**
- * Private Methods
- */
-
-wrappers._isChanged = function (tabId, key, value) {
-    // Remembers the last value per tab, so the browser is only called if something changed
-    if (wrappers._tabValues[tabId] === undefined) {
-        wrappers._tabValues[tabId] = {};
-    }
-    if (wrappers._tabValues[tabId][key] === value) {
-        return false;
-    }
-    wrappers._tabValues[tabId][key] = value;
-    return true;
-};
-
-
-/**
- * Initializations
- */
-
-wrappers._tabValues = {};

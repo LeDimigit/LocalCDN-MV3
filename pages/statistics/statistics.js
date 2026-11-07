@@ -30,7 +30,7 @@ statistics._onDocumentLoaded = function () {
     helpers.insertI18nContentIntoDocument(document);
     helpers.insertI18nTitlesIntoDocument(document);
 
-    browser.storage.local.get([Setting.DEFAULT_RANGE_STATISTIC], function (items) {
+    chrome.storage.local.get([Setting.DEFAULT_RANGE_STATISTIC], function (items) {
         statistics._dateUnit = items.defaultRangeStatistic || 'week';
         document.getElementById('date-range').value = statistics._dateUnit;
 
@@ -172,10 +172,10 @@ statistics._determineInjections = function () {
 };
 
 statistics._getStatistics = function () {
-    // Get the current data from the background page, the storage is updated with a delay
     return new Promise((resolve) => {
-        browser.runtime.sendMessage({'topic': 'statistic:get'}, function (response) {
-            statistics._data = response.value || {};
+        // Get the current data from the service worker, the storage is updated with a delay
+        chrome.runtime.sendMessage({'topic': 'statistic:get'}, function (response) {
+            statistics._data = (response && response.value) || {};
             resolve();
         });
     });
@@ -251,17 +251,17 @@ statistics._handlerDateRange = function ({target}) {
 };
 
 statistics._deleteStatistic = function () {
-    let text = browser.i18n.getMessage('dialogConfirmDeleteStatistics');
+    let text = chrome.i18n.getMessage('dialogConfirmDeleteStatistics');
     if (confirm(text)) {
-        browser.storage.local.set({
+        chrome.storage.local.set({
             [Setting.INTERNAL_STATISTICS_DATA]: {}
         });
-        browser.runtime.sendMessage({'topic': 'statistic:delete'});
+        chrome.runtime.sendMessage({'topic': 'statistic:delete'});
     }
 };
 
 statistics._saveDefaultRange = function (value) {
-    browser.storage.local.set({
+    chrome.storage.local.set({
         [Setting.DEFAULT_RANGE_STATISTIC]: value
     });
 };

@@ -39,11 +39,11 @@ helpers.insertI18nContentIntoDocument = function (document) {
     i18nElements.forEach(function (i18nElement) {
         const i18nMessageName = i18nElement.getAttribute('data-i18n-content');
 
-        if (browser.i18n.getMessage(i18nMessageName) !== '') {
+        if (chrome.i18n.getMessage(i18nMessageName) !== '') {
             if (i18nElement.type === 'button') {
-                i18nElement.value = browser.i18n.getMessage(i18nMessageName);
+                i18nElement.value = chrome.i18n.getMessage(i18nMessageName);
             } else {
-                i18nElement.textContent = browser.i18n.getMessage(i18nMessageName);
+                i18nElement.textContent = chrome.i18n.getMessage(i18nMessageName);
             }
             i18nElement.setAttribute('dir', scriptDirection);
         } else {
@@ -61,7 +61,7 @@ helpers.insertI18nTitlesIntoDocument = function (document) {
     i18nElements.forEach(function (i18nElement) {
         let i18nMessageName = i18nElement.getAttribute('data-i18n-title');
 
-        i18nElement.setAttribute('title', browser.i18n.getMessage(i18nMessageName));
+        i18nElement.setAttribute('title', chrome.i18n.getMessage(i18nMessageName));
         i18nElement.setAttribute('dir', scriptDirection);
     });
 };
@@ -240,13 +240,13 @@ helpers.determineActiveTab = function () {
             'currentWindow': true
         };
 
-        browser.tabs.query(opt, function (tabs) {
+        chrome.tabs.query(opt, function (tabs) {
             if (tabs[0]) {
                 resolve(tabs[0]);
             } else {
                 opt = {'active': true};
 
-                browser.tabs.query(opt, function (fallbackTabs) {
+                chrome.tabs.query(opt, function (fallbackTabs) {
                     resolve(fallbackTabs[0]);
                 });
             }

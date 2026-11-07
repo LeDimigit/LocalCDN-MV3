@@ -45,8 +45,7 @@ popup._renderContents = function () {
         .then(popup._determineStatusManipulateDOM)
         .then(popup._determineStatusGoogleFonts)
         .then(popup._determineResourceInjections)
-        .then(popup._renderContextualContents)
-        .then(popup._lockManagedToggles);
+        .then(popup._renderContextualContents);
 
     if (BrowserType.CHROMIUM) {
         document.getElementById('div-manipulateDOM').hidden = true;
@@ -196,33 +195,13 @@ popup._renderDomainAllowlistPanel = function () {
     websiteContextElement.style.display = 'block';
 };
 
-popup._lockManagedToggles = function () {
-    // Domain lists of an enterprise policy can't be changed
-    browser.runtime.sendMessage({'topic': 'settings:get-managed'}, function (response) {
-        const managedSettings = (response && response.value) || {};
-        const toggles = {
-            [Setting.ALLOWLISTED_DOMAINS]: 'protection-toggle-switch',
-            [Setting.DOMAINS_MANIPULATE_DOM]: 'manipulateDOM-toggle-switch',
-            [Setting.ALLOWED_DOMAINS_GOOGLE_FONTS]: 'google-fonts-toggle-switch'
-        };
-
-        for (const [key, id] of Object.entries(toggles)) {
-            if (key in managedSettings) {
-                const toggleElement = document.getElementById(id);
-                toggleElement.disabled = true;
-                toggleElement.closest('label').title = browser.i18n.getMessage('managedSetting');
-            }
-        }
-    });
-};
-
 popup._enableProtection = function () {
     let message = {
         'topic': 'allowlist:remove-domain',
         'value': popup._domain,
     };
 
-    browser.runtime.sendMessage(message, function () {
+    chrome.runtime.sendMessage(message, function () {
         popup._onToggled();
     });
 };
@@ -233,7 +212,7 @@ popup._disableProtection = function () {
         'value': popup._domain,
     };
 
-    browser.runtime.sendMessage(message, function () {
+    chrome.runtime.sendMessage(message, function () {
         popup._onToggled();
     });
 };
@@ -244,7 +223,7 @@ popup._enableManipulateDOM = function () {
         'value': popup._domain,
     };
 
-    browser.runtime.sendMessage(message, function () {
+    chrome.runtime.sendMessage(message, function () {
         popup._onToggled();
     });
 };
@@ -255,7 +234,7 @@ popup._disableManipulateDOM = function () {
         'value': popup._domain,
     };
 
-    browser.runtime.sendMessage(message, function () {
+    chrome.runtime.sendMessage(message, function () {
         popup._onToggled();
     });
 };
@@ -266,7 +245,7 @@ popup._enableGoogleFonts = function () {
         'value': popup._domain,
     };
 
-    browser.runtime.sendMessage(message, function () {
+    chrome.runtime.sendMessage(message, function () {
         popup._onToggled();
     });
 };
@@ -277,7 +256,7 @@ popup._disableGoogleFonts = function () {
         'value': popup._domain,
     };
 
-    browser.runtime.sendMessage(message, function () {
+    chrome.runtime.sendMessage(message, function () {
         popup._onToggled();
     });
 };
@@ -293,7 +272,7 @@ popup._determineDomainAllowlistStatus = function () {
             return;
         }
 
-        browser.runtime.sendMessage(message, function (response) {
+        chrome.runtime.sendMessage(message, function (response) {
             popup._domainIsAllowlisted = response.value;
             resolve();
         });
@@ -307,7 +286,7 @@ popup._determineStatusManipulateDOM = function () {
             'value': popup._domain,
         };
 
-        browser.runtime.sendMessage(message, function (response) {
+        chrome.runtime.sendMessage(message, function (response) {
             popup._domainManipulateDOM = response.value;
             resolve();
         });
@@ -321,7 +300,7 @@ popup._determineStatusGoogleFonts = function () {
             'value': popup._domain,
         };
 
-        browser.runtime.sendMessage(message, function (response) {
+        chrome.runtime.sendMessage(message, function (response) {
             if (response !== undefined) {
                 popup._domainGoogleFonts = response.value;
             }
@@ -337,7 +316,7 @@ popup._determineResourceInjections = function () {
             'value': popup._targetTab.id,
         };
 
-        browser.runtime.sendMessage(message, function (response) {
+        chrome.runtime.sendMessage(message, function (response) {
             popup._blockedCounter = response.value.blockedCounter;
             popup._missingCounter = response.value.missingCounter;
 
@@ -365,7 +344,7 @@ popup._getData = function () {
             'topic': 'popup:get-data'
         };
 
-        browser.runtime.sendMessage(message, function (items) {
+        chrome.runtime.sendMessage(message, function (items) {
             popup._amountInjected = items.data.amountInjected;
             popup._statisticsStatus = items.data.internalStatistics;
             popup.negateHtmlFilterList = items.data.negateHtmlFilterList;
@@ -529,7 +508,7 @@ popup._renderBlockedAndMissingElementHeader = function (counter, type) {
 popup._onDocumentLoaded = function () {
     let manifest, language;
 
-    manifest = browser.runtime.getManifest();
+    manifest = chrome.runtime.getManifest();
     language = navigator.language;
 
     popup._name = manifest.name;
@@ -541,7 +520,7 @@ popup._onDocumentLoaded = function () {
 
 popup._onTestingUtilityLinkClicked = function (ev) {
     if (ev.button === 0 || ev.button === 1) {
-        browser.tabs.create({
+        chrome.tabs.create({
             'url': Links.LOCALCDN_TEST_WEBSITE,
             'active': ev.button === 0,
         }, function (tab) {
@@ -552,7 +531,7 @@ popup._onTestingUtilityLinkClicked = function (ev) {
 
 popup._onDonationButtonClicked = function (ev) {
     if (ev.button === 0 || ev.button === 1) {
-        browser.tabs.create({
+        chrome.tabs.create({
             'url': Links.DONATE,
             'active': ev.button === 0,
         });
@@ -565,7 +544,7 @@ popup._onDonationButtonClicked = function (ev) {
 
 popup._onInfoButtonClicked = function (ev) {
     if (ev.button === 0 || ev.button === 1) {
-        browser.tabs.create({
+        chrome.tabs.create({
             'url': Links.FAQ_HTML_FILTER,
             'active': ev.button === 0,
         });
@@ -578,7 +557,7 @@ popup._onInfoButtonClicked = function (ev) {
 
 popup._onIncompleteTranslation = function (ev) {
     if (ev.button === 0 || ev.button === 1) {
-        browser.tabs.create({
+        chrome.tabs.create({
             'url': Links.WEBLATE,
             'active': ev.button === 0,
         });
@@ -591,7 +570,7 @@ popup._onIncompleteTranslation = function (ev) {
 
 popup._onStatisticsButtonClicked = function (ev) {
     if (ev.button === 0 || ev.button === 1) {
-        browser.tabs.create({
+        chrome.tabs.create({
             'url': Links.STATISTICS,
             'active': ev.button === 0,
         });
@@ -608,32 +587,32 @@ popup._injectDomain = function (tabId) {
         'url': popup._targetTab.url
     };
 
-    browser.runtime.sendMessage(message);
+    chrome.runtime.sendMessage(message);
     setTimeout(function () {
         popup._close();
     }, 200);
 };
 
 popup._onOptionsButtonClicked = function () {
-    browser.runtime.openOptionsPage();
+    chrome.runtime.openOptionsPage();
     return window.close();
 };
 
 popup._onToggled = function () {
     let bypassCache = typeof browser === 'undefined';
 
-    browser.tabs.reload(popup._targetTab.id, {bypassCache});
+    chrome.tabs.reload(popup._targetTab.id, {bypassCache});
     setTimeout(function () {
         popup._close();
     }, 200);
 };
 
 popup._close = function () {
-    browser.runtime.getPlatformInfo(function (information) {
-        if (information.os === browser.runtime.PlatformOs.ANDROID) {
-            browser.tabs.getCurrent(function (activeTab) {
+    chrome.runtime.getPlatformInfo(function (information) {
+        if (information.os === chrome.runtime.PlatformOs.ANDROID) {
+            chrome.tabs.getCurrent(function (activeTab) {
                 if (activeTab) {
-                    browser.tabs.remove(activeTab.id);
+                    chrome.tabs.remove(activeTab.id);
                 } else {
                     window.close();
                 }
@@ -646,7 +625,7 @@ popup._close = function () {
 
 popup._onLoggingButtonClicked = function (ev) {
     if (ev.button === 0 || ev.button === 1) {
-        browser.tabs.create({
+        chrome.tabs.create({
             'url': Links.LOGGING,
             'active': ev.button === 0,
         });
